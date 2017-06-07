@@ -79,15 +79,17 @@ var ChipmunkScene = cc.Scene.extend({
 			var sprite;
 			if ((Math.random()*10) <= 3 ) {
 				 sprite  = cc.PhysicsSprite.create("res/truck.png");
+		         sprite.setScale(0.5,0.5);
 			} else if ((Math.random()*10) <= 6 ) {
 				sprite  = cc.PhysicsSprite.create("res/truck2.png");
+		         sprite.setScale(0.1,0.1);
 			} else {
 				sprite  = cc.PhysicsSprite.create("res/bus.png");
+		         sprite.setScale(0.2,0.2);
 			}
 
 			this.space.addShape( shape );
 
-		     //   sprite.setScale(0.3,0.3);
 			//sprite.setContentSize(cc.size(135, 431));
 
 		     sprite.runAction(cc.Sequence.create(cc.FadeOut.create(3)));
