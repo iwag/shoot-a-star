@@ -55,10 +55,16 @@ var ChipmunkScene = cc.Scene.extend({
   addSprite: function(pos) {
     var sprite = this.createPhysicsSprite(pos);
     this.sprites.push(sprite);
-    if (this.sprites.length > 30) {
-      var s = this.sprites.pop();
-      s.removeFromParent();
+    var sprites = [];
+    for (var i = 0; i < this.sprites.length; i++) {
+      if (this.sprites[i] && i < 25) {
+        sprites.push(this.sprites[i]);
+      } else {
+        this.sprites[i].removeFromParent();
+      }
     }
+    this.sprites = sprites;
+
     this.addChild(sprite);
   },
 
@@ -71,6 +77,7 @@ var ChipmunkScene = cc.Scene.extend({
 
     shape.setElasticity(0.0);
     shape.setFriction(0.0);
+    shape.setCollisionType(0);
 
     var sprite;
     if ((Math.random() * 10) <= 3) {
@@ -93,9 +100,24 @@ var ChipmunkScene = cc.Scene.extend({
     sprite.setBody(body);
     return sprite;
   },
-
   onMouseDown: function(event) {
-    this.addSprite(event.getLocation());
+    var loc = event.getLocation();
+    var locBox = {
+      x: loc.x,
+      y: loc.y,
+      width: 30,
+      height: 30
+    };
+    for (var i = 0; i < this.sprites.length; i++) {
+      var sp = this.sprites[i];
+      if (!sp)
+        continue;
+      if (cc.rectIntersectsRect(locBox, sp.getBoundingBox())) {
+        this.sprites[i] = null;
+        sp.removeFromParent();
+      }
+    }
+    //this.addSprite(event.getLocation());
   },
 
   onTouchEnded: function(touches, event) {
