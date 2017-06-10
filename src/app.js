@@ -9,13 +9,11 @@ var ChipmunkScene = cc.Scene.extend({
     var wallBottom = new cp.SegmentShape(this.space.staticBody, cp.v(0, 600), // start point
         cp.v(4294967295, 800), // MAX INT:4294967295
         0); // thickness of wall
-
     this.sprites = [];
   },
   onEnter: function() {
     this._super();
     this.initPhysics();
-
     //add three layer in the right order
     this.addChild(cc.LayerGradient.create(cc.color(255, 255, 255, 255), cc.color(98 * 0.5, 99 * 0.5, 117, 255)));
 
@@ -35,10 +33,34 @@ var ChipmunkScene = cc.Scene.extend({
       this.addSprite(cp.v(x, y));
     }.bind(this), 0.3, 1000, 0);
 
-    //    if( 'touches' in sys.capabilities )
-    //		this.setTouchEnabled(true);
-    //  else if( 'mouse' in sys.capabilities )
-    //	 this.setMouseEnabled(true);
+    this.score = 0;
+    this.scoreLabel = new cc.LabelTTF("-", "Arial", 38);
+    this.scoreLabel.setColor(cc.color(0,0,0,255));
+    // position the label on the center of the screen
+    this.scoreLabel.x = winSize.width / 2;
+    this.scoreLabel.y = winSize.height - 40;
+    this.addChild(this.scoreLabel, 5);
+
+    this.remain = 60;
+    this.remainLabel = new cc.LabelTTF(this.remain, "Arial", 38);
+    this.remainLabel.setColor(cc.color(0,0,0,255));
+    // position the label on the center of the screen
+    this.remainLabel.x = 30;
+    this.remainLabel.y = winSize.height - 40;
+    this.addChild(this.remainLabel, 5);
+
+    this.secondLabel = new cc.LabelTTF("sec", "Arial", 38);
+    this.secondLabel.setColor(cc.color(0,0,0,255));
+    // position the label on the center of the screen
+    this.secondLabel.x = 100;
+    this.secondLabel.y = winSize.height - 40;
+    this.addChild(this.secondLabel, 5);
+
+    this.schedule(function() {
+      this.remain -= 1;
+      this.remainLabel.setString(this.remain);
+    }.bind(this), 1, 1000, 0);
+
 
     cc.eventManager.addListener({
       event: cc.EventListener.TOUCH_ONE_BY_ONE,
@@ -54,14 +76,14 @@ var ChipmunkScene = cc.Scene.extend({
 
   addSprite: function(pos) {
     var sprite = this.createPhysicsSprite(pos);
-    this.sprites.push(sprite);
+    this.sprites.unshift(sprite);
     var sprites = [];
     for (var i = 0; i < this.sprites.length; i++) {
       if (this.sprites[i] && i < 25) {
         sprites.push(this.sprites[i]);
       } else {
-        this.sprites[i].removeFromParent();
-      }
+        this.sprites[i] && this.sprites[i].removeFromParent();
+     }
     }
     this.sprites = sprites;
 
@@ -95,10 +117,16 @@ var ChipmunkScene = cc.Scene.extend({
 
     //sprite.setContentSize(cc.size(135, 431));
 
-    sprite.runAction(cc.Sequence.create(cc.FadeOut.create(3)));
+    sprite.runAction(cc.Sequence.create(cc.FadeOut.create(3), new cc.callFunc(this.removeSprite(sprite), this)));
 
     sprite.setBody(body);
     return sprite;
+  },
+  removeSprite: function(sp) {
+    return function() {
+      sp.setVisible(false);
+      sp.removeFromParent();
+    };
   },
   onMouseDown: function(event) {
     var loc = event.getLocation();
@@ -113,8 +141,10 @@ var ChipmunkScene = cc.Scene.extend({
       if (!sp)
         continue;
       if (cc.rectIntersectsRect(locBox, sp.getBoundingBox())) {
+        this.scoreLabel.setString(this.score += 10);
         this.sprites[i] = null;
         sp.removeFromParent();
+        break;
       }
     }
     //this.addSprite(event.getLocation());
