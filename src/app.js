@@ -65,7 +65,7 @@ var ChipmunkScene = cc.Scene.extend({
     cc.eventManager.addListener({
       event: cc.EventListener.TOUCH_ONE_BY_ONE,
       swallowTouches: true,
-      onTouchEnded: this.onTouchEnded
+      onTouchEnded: this.onTouchEnded.bind(this)
     }, this);
 
     cc.eventManager.addListener({
@@ -147,13 +147,30 @@ var ChipmunkScene = cc.Scene.extend({
         break;
       }
     }
-    //this.addSprite(event.getLocation());
   },
 
   onTouchEnded: function(touches, event) {
     var l = touches.length;
-    for (var i = 0; i < l; i++) {
-      this.addSprite(touches[i].getLocation());
+    for (var j = 0; j < l; j++) {
+
+      var loc = touches[j].getLocation();
+      var locBox = {
+        x: loc.x,
+        y: loc.y,
+        width: 30,
+        height: 30
+      };
+      for (var i = 0; i < this.sprites.length; i++) {
+        var sp = this.sprites[i];
+        if (!sp)
+          continue;
+        if (cc.rectIntersectsRect(locBox, sp.getBoundingBox())) {
+          this.scoreLabel.setString(this.score += 10);
+          this.sprites[i] = null;
+          sp.removeFromParent();
+          break;
+        }
+      }
     }
   },
 
